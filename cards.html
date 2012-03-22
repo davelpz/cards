@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="cards.js" type="text/javascript"></script>
+</head>
+<body>
+</body>
+<script>
+	var d = new Deck(3)
+	console.log(d)
+	d.dump()
+	console.log("Shuffle")
+	d.shuffle();
+	d.dump()
+	var s = new Stack()
+	console.log(s)
+	s.putOnTop(new Card("Ace","Diamonds"))
+	s.putOnTop(new Card("2","Diamonds"))
+	console.log(s)
+</script>
+</html>
