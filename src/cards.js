@@ -1,5 +1,5 @@
 (function() {
-  var Card, Deck, Stack, _ranks, _suites,
+  var Board, Card, Deck, Stack, _ranks, _suites,
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
@@ -20,13 +20,13 @@
     };
 
     Card.prototype.isFaceUp = function() {
-      return faceUp === true;
+      return this.faceUp === true;
     };
 
-    Card.prototype.faceUp = function(arg) {
-      var faceUp;
+    Card.prototype.setFaceUp = function(arg) {
       if (arg == null) arg = true;
-      return faceUp = arg;
+      this.faceUp = arg;
+      return this;
     };
 
     Card.prototype.toString = function() {
@@ -62,18 +62,39 @@
       return this.cards.length;
     };
 
+    Stack.prototype.topCard = function() {
+      var l;
+      l = this.cards.length;
+      if (l > 0) {
+        return this.cards[l - 1];
+      } else {
+        return;
+      }
+    };
+
     Stack.prototype.takeFromTop = function() {
       var l, t;
       l = this.cards.length;
       if (l > 0) {
         t = this.cards[l - 1];
-        this.cards.length -= 1;
+        this.cards.length--;
       }
       return t;
     };
 
     Stack.prototype.putOnTop = function(card) {
       this.cards.push(card);
+      return this;
+    };
+
+    Stack.prototype.takeFromBottom = function() {
+      var t;
+      if (this.cards.length > 0) t = this.cards.shift();
+      return t;
+    };
+
+    Stack.prototype.putOnBottom = function(card) {
+      this.cards.unshift(card);
       return this;
     };
 
@@ -114,10 +135,40 @@
 
   })(Stack);
 
+  Board = (function() {
+
+    function Board() {
+      this.init();
+    }
+
+    Board.prototype.init = function() {
+      var i, t;
+      this.stock = new Deck();
+      this.stock.shuffle();
+      this.waste = new Stack();
+      this.tableau = [new Stack(), new Stack(), new Stack(), new Stack(), new Stack(), new Stack(), new Stack()];
+      this.foundation = [new Stack(), new Stack(), new Stack(), new Stack()];
+      for (i = 0; i <= 6; i++) {
+        for (t = i; i <= 6 ? t <= 6 : t >= 6; i <= 6 ? t++ : t--) {
+          this.tableau[t].putOnTop(this.stock.takeFromTop());
+        }
+      }
+      for (i = 0; i <= 6; i++) {
+        this.tableau[i].topCard().setFaceUp();
+      }
+      return this;
+    };
+
+    return Board;
+
+  })();
+
   window.Card = Card;
 
   window.Stack = Stack;
 
   window.Deck = Deck;
+
+  window.Board = Board;
 
 }).call(this);

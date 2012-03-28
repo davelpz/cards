@@ -9,10 +9,11 @@ class Card
 		return @suite is arg.suite and @rank is arg.rank
 
 	isFaceUp: ->
-		faceUp is true
+		@faceUp is true
 
-	faceUp: (arg=true) ->
-		faceUp = arg
+	setFaceUp: (arg=true) ->
+		@faceUp = arg
+		this
 
 	toString: ->
 		"Card(#{@rank},#{@suite})"
@@ -30,15 +31,33 @@ class Stack
 	length: ->
 		@cards.length
 
+	topCard: ->
+		l = @cards.length
+		if l > 0
+			@cards[l-1]
+		else
+			undefined
+
 	takeFromTop: ->
 		l = @cards.length
 		if l > 0
 			t = @cards[l-1]
-			@cards.length-=1
+			@cards.length--
 		t
+
 	putOnTop: (card)->
 		@cards.push(card)
 		this
+
+	takeFromBottom: ->
+		if @cards.length > 0
+			t = @cards.shift()
+		t
+
+	putOnBottom: (card)->
+		@cards.unshift(card)
+		this
+
 	dump: ->
 		for i in [0...@cards.length]
 			console.log(""+@cards[i])
@@ -53,6 +72,27 @@ class Deck extends Stack
 					t = new Card(r,s)
 					@cards.push(t)
 
+class Board
+	constructor: ->
+		@init()
+
+	init: ->
+		@stock = new Deck()
+		@stock.shuffle()
+		@waste = new Stack()
+		@tableau = [new Stack(),new Stack(),new Stack(),new Stack(),new Stack(),new Stack(),new Stack()]
+		@foundation = [new Stack(),new Stack(),new Stack(),new Stack()]
+
+		for i in [0..6]
+			for t in [i..6]
+				@tableau[t].putOnTop(@stock.takeFromTop())
+
+		for i in [0..6]
+			@tableau[i].topCard().setFaceUp()
+
+		this
+
 window.Card = Card
 window.Stack = Stack
 window.Deck = Deck
+window.Board = Board

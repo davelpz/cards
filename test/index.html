@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<link rel="stylesheet" href="qunit.css" type="text/css" media="screen" />
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script src="qunit.js" type="text/javascript"></script>
+	<script src="../src/cards.js" type="text/javascript"></script>
+</head>
+<body>
+	 <h1 id="qunit-header">QUnit example</h1>
+	 <h2 id="qunit-banner"></h2>
+	 <div id="qunit-testrunner-toolbar"></div>
+	 <h2 id="qunit-userAgent"></h2>
+	 <ol id="qunit-tests"></ol>
+	 <div id="qunit-fixture">test markup, will be hidden</div>
+</body>
+<script>
+	$(function() {
+		module("Card");
+		test("basic functionality", function() {
+			var c1 = new Card("Ace","Spades");
+			var c2 = new Card("Ace","Spades");
+
+			ok( c1, "constructor worked" );
+			equal( c1.rank, "Ace", "rank should be Ace" );
+			equal( c1.suite, "Spades", "suite should be Spades" );
+			equal( c1.faceUp, false, "faceUp should be false" );
+			ok(c1.setFaceUp,"setFaceUp");
+			c1.setFaceUp();
+			equal( c1.faceUp, true, "faceUp should be true" );
+			ok(c1.isFaceUp,"isFaceUp");
+			equal( c1.isFaceUp(), true, "isFaceUp should be true" );
+			ok(c1.equal,"equal");
+			equal( c1.equal(c2), true, "equal should be true" );
+			ok(c1.toString,"toString");
+			equal( c1.toString(), "Card(Ace,Spades)", 'toString should return "Card(Ace,Spades)"' );
+		});
+		module("Stack");
+		test("basic functionality", function() {
+			var s1 = new Stack();
+			var c1 = new Card("Ace","Diamonds");
+			var c2 = new Card("2","Diamonds");
+
+			ok( s1, "constructor worked" );
+			equal( s1.length(), 0, "length should be zero" );
+			ok( s1.topCard, "topCard" );
+			ok( s1.putOnTop, "putOnTop" );
+			s1.putOnTop(new Card("Ace","Diamonds"))
+			s1.putOnTop(new Card("2","Diamonds"))
+			equal( s1.topCard().equal(c2), true, "top card should be 2 of Diamonds" );
+			equal( s1.length(), 2, "length should be two" );
+			var c = s1.takeFromTop()
+			equal( c.equal(c2), true, "card should be 2 of Diamonds" );
+			equal( s1.length(), 1, "length should be one" );
+			c = s1.takeFromTop()
+			equal( c.equal(c1), true, "card should be Ace of Diamonds" );
+			equal( s1.length(), 0, "length should be zero" );
+			c = s1.takeFromTop()
+			equal( c===undefined, true, "card should undefined" );
+			equal( s1.length(), 0, "length should be zero" );
+
+			ok( s1.putOnBottom, "putOnBottom" );
+			s1.putOnBottom(new Card("Ace","Diamonds"))
+			s1.putOnBottom(new Card("2","Diamonds"))
+			equal( s1.length(), 2, "length should be two" );
+			equal( s1.topCard().equal(c1), true, "top card should be Ace of Diamonds" );
+			var c = s1.takeFromBottom()
+			equal( c.equal(c2), true, "card should be 2 of Diamonds" );
+			equal( s1.length(), 1, "length should be one" );
+			c = s1.takeFromBottom()
+			equal( c.equal(c1), true, "card should be Ace of Diamonds" );
+			equal( s1.length(), 0, "length should be zero" );
+			c = s1.takeFromBottom()
+			equal( c===undefined, true, "card should undefined" );
+			equal( s1.length(), 0, "length should be zero" );
+		});
+		module("Deck");
+		test("basic functionality", function() {
+			var d1 = new Deck();
+			var d2 = new Deck(2);
+			var d3 = new Deck(3);
+
+			ok( d1, "constructor worked" );
+			equal( d1.length(), 52, "length should be 52" );
+			equal( d2.length(), 52*2, "length should be 104" );
+			equal( d3.length(), 52*3, "length should be 156" );
+		});
+		module("Board");
+		test("basic functionality", function() {
+			var b1 = new Board();
+
+			ok( b1, "constructor worked" )
+			equal(b1.stock.length(),24,"stock should have 24")
+			equal(b1.waste.length(),0,"waste should have zero")
+			equal(b1.foundation[0].length(),0,"foundation 1 should have zero")
+			equal(b1.foundation[1].length(),0,"foundation 2 should have zero")
+			equal(b1.foundation[2].length(),0,"foundation 3 should have zero")
+			equal(b1.foundation[3].length(),0,"foundation 4 should have zero")
+			equal(b1.tableau[0].length(),1,"tableau 1 should have 1")
+			equal(b1.tableau[1].length(),2,"tableau 2 should have 2")
+			equal(b1.tableau[2].length(),3,"tableau 3 should have 3")
+			equal(b1.tableau[3].length(),4,"tableau 4 should have 4")
+			equal(b1.tableau[4].length(),5,"tableau 5 should have 5")
+			equal(b1.tableau[5].length(),6,"tableau 6 should have 6")
+			equal(b1.tableau[6].length(),7,"tableau 7 should have 7")
+			ok(b1.tableau[0].topCard().faceUp,"tableau 1 top card should be face up")
+			ok(b1.tableau[1].topCard().faceUp,"tableau 2 top card should be face up")
+			ok(b1.tableau[2].topCard().faceUp,"tableau 3 top card should be face up")
+			ok(b1.tableau[3].topCard().faceUp,"tableau 4 top card should be face up")
+			ok(b1.tableau[4].topCard().faceUp,"tableau 5 top card should be face up")
+			ok(b1.tableau[5].topCard().faceUp,"tableau 6 top card should be face up")
+			ok(b1.tableau[6].topCard().faceUp,"tableau 7 top card should be face up")
+		});
+	});
+</script>
+</html>
