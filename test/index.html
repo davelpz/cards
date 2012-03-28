@@ -84,6 +84,9 @@
 			equal( d1.length(), 52, "length should be 52" );
 			equal( d2.length(), 52*2, "length should be 104" );
 			equal( d3.length(), 52*3, "length should be 156" );
+			ok( d1.clear, "clear" );
+			d1.clear();
+			equal( d1.length(), 0, "length should be zero" );
 		});
 		module("Board");
 		test("basic functionality", function() {
@@ -110,6 +113,35 @@
 			ok(b1.tableau[4].topCard().faceUp,"tableau 5 top card should be face up")
 			ok(b1.tableau[5].topCard().faceUp,"tableau 6 top card should be face up")
 			ok(b1.tableau[6].topCard().faceUp,"tableau 7 top card should be face up")
+
+			ok( b1.deal, "deal" );
+			b1.deal();
+			equal(b1.stock.length(),21,"stock should have 21")
+			equal(b1.waste.length(),3,"waste should have 3")
+			b1.deal();
+			equal(b1.stock.length(),18,"stock should have 18")
+			equal(b1.waste.length(),6,"waste should have 6")
+			b1.deal();
+			equal(b1.stock.length(),15,"stock should have 15")
+			equal(b1.waste.length(),9,"waste should have 9")
+			b1.deal();
+			equal(b1.stock.length(),12,"stock should have 12")
+			equal(b1.waste.length(),12,"waste should have 12")
+			b1.deal();
+			equal(b1.stock.length(),9,"stock should have 9")
+			equal(b1.waste.length(),15,"waste should have 15")
+			b1.deal();
+			equal(b1.stock.length(),6,"stock should have 6")
+			equal(b1.waste.length(),18,"waste should have 18")
+			b1.deal();
+			equal(b1.stock.length(),3,"stock should have 3")
+			equal(b1.waste.length(),21,"waste should have 21")
+			b1.deal();
+			equal(b1.stock.length(),0,"stock should have 0")
+			equal(b1.waste.length(),24,"waste should have 24")
+			b1.deal();
+			equal(b1.stock.length(),24,"stock should have 24")
+			equal(b1.waste.length(),0,"waste should have 0")
 		});
 	});
 </script>

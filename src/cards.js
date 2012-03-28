@@ -62,6 +62,11 @@
       return this.cards.length;
     };
 
+    Stack.prototype.clear = function() {
+      this.cards.length = 0;
+      return this;
+    };
+
     Stack.prototype.topCard = function() {
       var l;
       l = this.cards.length;
@@ -155,6 +160,33 @@
       }
       for (i = 0; i <= 6; i++) {
         this.tableau[i].topCard().setFaceUp();
+      }
+      return this;
+    };
+
+    Board.prototype.deal = function() {
+      var c, _i, _len, _ref;
+      if (this.stock.length()) {
+        c = this.stock.takeFromTop();
+        c.setFaceUp(true);
+        this.waste.putOnTop(c);
+        c = this.stock.takeFromTop();
+        if (c) {
+          c.setFaceUp(true);
+          this.waste.putOnTop(c);
+        }
+        c = this.stock.takeFromTop();
+        if (c) {
+          c.setFaceUp(true);
+          this.waste.putOnTop(c);
+        }
+      } else {
+        _ref = this.waste.cards;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          c = _ref[_i];
+          this.stock.putOnBottom(c);
+        }
+        this.waste.clear();
       }
       return this;
     };

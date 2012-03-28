@@ -31,6 +31,10 @@ class Stack
 	length: ->
 		@cards.length
 
+	clear: ->
+		@cards.length=0
+		this
+
 	topCard: ->
 		l = @cards.length
 		if l > 0
@@ -89,6 +93,28 @@ class Board
 
 		for i in [0..6]
 			@tableau[i].topCard().setFaceUp()
+
+		this
+
+	deal: ->
+		if @stock.length()
+			c = @stock.takeFromTop()
+			c.setFaceUp(true)
+			@waste.putOnTop(c)
+
+			c = @stock.takeFromTop()
+			if c
+				c.setFaceUp(true)
+				@waste.putOnTop(c)
+
+			c = @stock.takeFromTop()
+			if c
+				c.setFaceUp(true)
+				@waste.putOnTop(c)
+		else
+			for c in @waste.cards
+				@stock.putOnBottom(c)
+			@waste.clear()
 
 		this
 
