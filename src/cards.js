@@ -3,7 +3,7 @@
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
-  _suites = ["Spades", "Hearts", "Diamonds", "Clubs"];
+  _suites = ["Spades", "Hearts", "Clubs", "Diamonds"];
 
   _ranks = ["Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"];
 
@@ -17,6 +17,26 @@
 
     Card.prototype.equal = function(arg) {
       return this.suite === arg.suite && this.rank === arg.rank;
+    };
+
+    Card.prototype.sameSuite = function(arg) {
+      return this.suite === arg.suite;
+    };
+
+    Card.prototype.sameRank = function(arg) {
+      return this.rank === arg.rank;
+    };
+
+    Card.prototype.sameColor = function(arg) {
+      if (this.suite === "Spades" || this.suite === "Clubs") {
+        return arg.suite === "Spades" || arg.suite === "Clubs";
+      } else if (this.suite === "Hearts" || this.suite === "Diamonds") {
+        return arg.suite === "Hearts" || arg.suite === "Diamonds";
+      }
+    };
+
+    Card.prototype.isLower = function(arg) {
+      return _ranks.indexOf(arg.rank) < _ranks.indexOf(this.rank);
     };
 
     Card.prototype.isFaceUp = function() {
@@ -168,27 +188,41 @@
       var c, _i, _len, _ref;
       if (this.stock.length()) {
         c = this.stock.takeFromTop();
-        c.setFaceUp(true);
+        c.setFaceUp();
         this.waste.putOnTop(c);
         c = this.stock.takeFromTop();
         if (c) {
-          c.setFaceUp(true);
+          c.setFaceUp();
           this.waste.putOnTop(c);
         }
         c = this.stock.takeFromTop();
         if (c) {
-          c.setFaceUp(true);
+          c.setFaceUp();
           this.waste.putOnTop(c);
         }
       } else {
         _ref = this.waste.cards;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           c = _ref[_i];
+          c.setFaceUp(false);
           this.stock.putOnBottom(c);
         }
         this.waste.clear();
       }
       return this;
+    };
+
+    Board.prototype.wasteToFoundation = function(index) {
+      var c;
+      if (index == null) index = 0;
+      if (this.waste.length()) {
+        c = this.waste.takeFromTop();
+        c.setFaceUp();
+        this.foundation[index].putOnTop(c);
+        return true;
+      } else {
+        return false;
+      }
     };
 
     return Board;

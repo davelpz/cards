@@ -1,5 +1,5 @@
 
-_suites = ["Spades","Hearts","Diamonds","Clubs"]
+_suites = ["Spades","Hearts","Clubs","Diamonds"]
 _ranks = ["Ace","2","3","4","5","6","7","8","9","10","Jack","Queen","King"]
 
 class Card
@@ -7,6 +7,21 @@ class Card
 
 	equal: (arg) ->
 		return @suite is arg.suite and @rank is arg.rank
+
+	sameSuite: (arg) ->
+		return @suite is arg.suite
+
+	sameRank: (arg) ->
+		return @rank is arg.rank
+
+	sameColor: (arg) ->
+		if @suite is "Spades" or @suite is "Clubs"
+			return arg.suite is "Spades" or arg.suite is "Clubs"
+		else if @suite is "Hearts" or @suite is "Diamonds"
+			return arg.suite is "Hearts" or arg.suite is "Diamonds"
+
+	isLower: (arg) ->
+		_ranks.indexOf(arg.rank) < _ranks.indexOf(@rank)
 
 	isFaceUp: ->
 		@faceUp is true
@@ -99,24 +114,34 @@ class Board
 	deal: ->
 		if @stock.length()
 			c = @stock.takeFromTop()
-			c.setFaceUp(true)
+			c.setFaceUp()
 			@waste.putOnTop(c)
 
 			c = @stock.takeFromTop()
 			if c
-				c.setFaceUp(true)
+				c.setFaceUp()
 				@waste.putOnTop(c)
 
 			c = @stock.takeFromTop()
 			if c
-				c.setFaceUp(true)
+				c.setFaceUp()
 				@waste.putOnTop(c)
 		else
 			for c in @waste.cards
+				c.setFaceUp(false)
 				@stock.putOnBottom(c)
 			@waste.clear()
 
 		this
+
+	wasteToFoundation:(index=0) ->
+		if @waste.length()
+			c = @waste.takeFromTop()
+			c.setFaceUp()
+			@foundation[index].putOnTop(c)
+			true
+		else
+			false
 
 window.Card = Card
 window.Stack = Stack

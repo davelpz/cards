@@ -20,6 +20,9 @@
 		test("basic functionality", function() {
 			var c1 = new Card("Ace","Spades");
 			var c2 = new Card("Ace","Spades");
+			var c3 = new Card("Ace","Diamonds");
+			var c4 = new Card("10","Hearts");
+			var c5 = new Card("9","Clubs");
 
 			ok( c1, "constructor worked" );
 			equal( c1.rank, "Ace", "rank should be Ace" );
@@ -30,6 +33,17 @@
 			equal( c1.faceUp, true, "faceUp should be true" );
 			ok(c1.isFaceUp,"isFaceUp");
 			equal( c1.isFaceUp(), true, "isFaceUp should be true" );
+			ok(c1.sameSuite,"sameSuite");
+			ok(c1.sameSuite(c2),"suites are the same");
+			ok(c1.sameRank,"sameRank");
+			ok(c1.sameRank(c3),"ranks are the same");
+			ok(c1.sameColor,"sameColor");
+			ok(c1.sameColor(c5),"same color");
+			ok(c3.sameColor(c4),"same color");
+			equal(c1.sameColor(c3),false,"not same color")
+			equal(c3.sameColor(c5),false,"not same color")
+			ok(c1.isLower,"isLower");
+			ok(c4.isLower(c5),"rank is lower");
 			ok(c1.equal,"equal");
 			equal( c1.equal(c2), true, "equal should be true" );
 			ok(c1.toString,"toString");
@@ -142,6 +156,11 @@
 			b1.deal();
 			equal(b1.stock.length(),24,"stock should have 24")
 			equal(b1.waste.length(),0,"waste should have 0")
+
+			equal(b1.wasteToFoundation(0),false,"w2f 0 should return false")
+			b1.deal()
+			equal(b1.wasteToFoundation(0),true,"w2f 0 should return true")
+			equal(b1.foundation[0].length(),1,"foundation 0 should have 1")
 		});
 	});
 </script>
