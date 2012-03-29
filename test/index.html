@@ -44,6 +44,8 @@
 			equal(c3.sameColor(c5),false,"not same color")
 			ok(c1.isLower,"isLower");
 			ok(c4.isLower(c5),"rank is lower");
+			ok(c1.isHigher,"isHigher");
+			ok(c1.isHigher(c5),"rank is higher");
 			ok(c1.equal,"equal");
 			equal( c1.equal(c2), true, "equal should be true" );
 			ok(c1.toString,"toString");
@@ -155,12 +157,23 @@
 			equal(b1.waste.length(),24,"waste should have 24")
 			b1.deal();
 			equal(b1.stock.length(),24,"stock should have 24")
-			equal(b1.waste.length(),0,"waste should have 0")
+			equal(b1.waste.length(),0,"waste should have 0");
 
+			ok( b1.wasteToFoundation, "wasteToFoundation" );
 			equal(b1.wasteToFoundation(0),false,"w2f 0 should return false")
 			b1.deal()
 			equal(b1.wasteToFoundation(0),true,"w2f 0 should return true")
 			equal(b1.foundation[0].length(),1,"foundation 0 should have 1")
+
+			ok( b1.wasteToTableau, "wasteToTableau" );
+			equal(b1.wasteToTableau(0),true,"w2t 0 should return true")
+			equal(b1.wasteToTableau(1),true,"w2t 1 should return true")
+			equal(b1.wasteToTableau(2),false,"w2t 2 should return false")
+
+			equal(b1.tableau[0].length(),2,"tableau 0 should have 2")
+			equal(b1.tableau[1].length(),3,"tableau 1 should have 3")
+			equal(b1.tableau[2].length(),3,"tableau 2 should have 3")
+
 		});
 	});
 </script>

@@ -15,13 +15,16 @@ class Card
 		return @rank is arg.rank
 
 	sameColor: (arg) ->
-		if @suite is "Spades" or @suite is "Clubs"
-			return arg.suite is "Spades" or arg.suite is "Clubs"
-		else if @suite is "Hearts" or @suite is "Diamonds"
-			return arg.suite is "Hearts" or arg.suite is "Diamonds"
+		if @suite is _suites[0] or @suite is _suites[2]
+			return arg.suite is _suites[0] or arg.suite is _suites[2]
+		else if @suite is _suites[1] or @suite is _suites[3]
+			return arg.suite is _suites[1] or arg.suite is _suites[3]
 
 	isLower: (arg) ->
 		_ranks.indexOf(arg.rank) < _ranks.indexOf(@rank)
+
+	isHigher: (arg) ->
+		_ranks.indexOf(arg.rank) > _ranks.indexOf(@rank)
 
 	isFaceUp: ->
 		@faceUp is true
@@ -143,6 +146,21 @@ class Board
 		else
 			false
 
+	wasteToTableau:(index=0) ->
+		if @waste.length()
+			c = @waste.takeFromTop()
+			c.setFaceUp()
+			@tableau[index].putOnTop(c)
+			true
+		else
+			false
+
+	tableauToFoundation: (tIndex=0,fIndex=0) ->
+
+	tableauToTableau: (tIndex1=0,count=1,tIndex2=0) ->
+
+	foundationToTableau: (fIndex=0,tIndex=0) ->
+		
 window.Card = Card
 window.Stack = Stack
 window.Deck = Deck

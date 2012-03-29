@@ -28,15 +28,19 @@
     };
 
     Card.prototype.sameColor = function(arg) {
-      if (this.suite === "Spades" || this.suite === "Clubs") {
-        return arg.suite === "Spades" || arg.suite === "Clubs";
-      } else if (this.suite === "Hearts" || this.suite === "Diamonds") {
-        return arg.suite === "Hearts" || arg.suite === "Diamonds";
+      if (this.suite === _suites[0] || this.suite === _suites[2]) {
+        return arg.suite === _suites[0] || arg.suite === _suites[2];
+      } else if (this.suite === _suites[1] || this.suite === _suites[3]) {
+        return arg.suite === _suites[1] || arg.suite === _suites[3];
       }
     };
 
     Card.prototype.isLower = function(arg) {
       return _ranks.indexOf(arg.rank) < _ranks.indexOf(this.rank);
+    };
+
+    Card.prototype.isHigher = function(arg) {
+      return _ranks.indexOf(arg.rank) > _ranks.indexOf(this.rank);
     };
 
     Card.prototype.isFaceUp = function() {
@@ -223,6 +227,35 @@
       } else {
         return false;
       }
+    };
+
+    Board.prototype.wasteToTableau = function(index) {
+      var c;
+      if (index == null) index = 0;
+      if (this.waste.length()) {
+        c = this.waste.takeFromTop();
+        c.setFaceUp();
+        this.tableau[index].putOnTop(c);
+        return true;
+      } else {
+        return false;
+      }
+    };
+
+    Board.prototype.tableauToFoundation = function(tIndex, fIndex) {
+      if (tIndex == null) tIndex = 0;
+      if (fIndex == null) fIndex = 0;
+    };
+
+    Board.prototype.tableauToTableau = function(tIndex1, count, tIndex2) {
+      if (tIndex1 == null) tIndex1 = 0;
+      if (count == null) count = 1;
+      if (tIndex2 == null) tIndex2 = 0;
+    };
+
+    Board.prototype.foundationToTableau = function(fIndex, tIndex) {
+      if (fIndex == null) fIndex = 0;
+      if (tIndex == null) tIndex = 0;
     };
 
     return Board;
