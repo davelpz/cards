@@ -36,6 +36,15 @@ class Card
 	toString: ->
 		"Card(#{@rank},#{@suite})"
 
+class _cardEncode
+	@encode: (card) ->
+		val = 33 + _suites.indexOf(card.suite) * 13
+		val += _ranks.indexOf(card.rank)
+		if (card.isFaceUp())
+			val += 52
+
+		String.fromCharCode(val)
+
 class Stack
 	constructor: (@cards=[])->
 	
@@ -80,9 +89,17 @@ class Stack
 		@cards.unshift(card)
 		this
 
+	getState: ->
+		val = ""
+		for i in [0...@cards.length]
+			val += _cardEncode.encode(@cards[i])
+		val
+
 	dump: ->
 		for i in [0...@cards.length]
-			console.log(""+@cards[i])
+			console.log(""+i+": "+@cards[i])
+			@cards[i].setFaceUp()
+
 
 class Deck extends Stack
 	constructor: (decks=1)->
@@ -137,29 +154,61 @@ class Board
 
 		this
 
-	wasteToFoundation:(index=0) ->
-		if @waste.length()
-			c = @waste.takeFromTop()
-			c.setFaceUp()
-			@foundation[index].putOnTop(c)
+	_stackToStack: (stack1,stack2) ->
+		if stack1 and stack2 and stack1.length()
+			c = stack1.takeFromTop()
+			stack2.putOnTop(c)
+			c
+		else
+			false
+
+	wasteToFoundation:(fIndex=0) ->
+		if @_stackToStack(@waste,@foundation[fIndex])
 			true
 		else
 			false
 
-	wasteToTableau:(index=0) ->
-		if @waste.length()
-			c = @waste.takeFromTop()
-			c.setFaceUp()
-			@tableau[index].putOnTop(c)
+	foundationToWaste:(fIndex=0) ->
+		if @_stackToStack(@foundation[fIndex],@waste)
+			true
+		else
+			false
+
+	wasteToTableau:(tIndex=0) ->
+		if @_stackToStack(@waste,@tableau[tIndex])
+			true
+		else
+			false
+
+	tableauToWaste:(tIndex=0) ->
+		if @_stackToStack(@tableau[tIndex],@waste)
 			true
 		else
 			false
 
 	tableauToFoundation: (tIndex=0,fIndex=0) ->
+		if @_stackToStack(@tableau[tIndex],@foundation[fIndex])
+			true
+		else
+			false
 
 	tableauToTableau: (tIndex1=0,count=1,tIndex2=0) ->
+		return false if @tableau[tIndex1].length() < count 
+
+		s = new Stack()
+		for i in [0...count]
+			@_stackToStack(@tableau[tIndex1],s)
+
+		for i in [0...count]
+			return false if not @_stackToStack(s,@tableau[tIndex2]) 
+
+		true
 
 	foundationToTableau: (fIndex=0,tIndex=0) ->
+		if @_stackToStack(@foundation[fIndex],@tableau[tIndex])
+			true
+		else
+			false
 		
 window.Card = Card
 window.Stack = Stack

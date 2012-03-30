@@ -1,5 +1,5 @@
 (function() {
-  var Board, Card, Deck, Stack, _ranks, _suites,
+  var Board, Card, Deck, Stack, _cardEncode, _ranks, _suites,
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
@@ -58,6 +58,22 @@
     };
 
     return Card;
+
+  })();
+
+  _cardEncode = (function() {
+
+    function _cardEncode() {}
+
+    _cardEncode.encode = function(card) {
+      var val;
+      val = 33 + _suites.indexOf(card.suite) * 13;
+      val += _ranks.indexOf(card.rank);
+      if (card.isFaceUp()) val += 52;
+      return String.fromCharCode(val);
+    };
+
+    return _cardEncode;
 
   })();
 
@@ -127,11 +143,26 @@
       return this;
     };
 
-    Stack.prototype.dump = function() {
-      var i, _ref, _results;
-      _results = [];
+    Stack.prototype.getState = function() {
+      var i, val, _ref;
+      val = "";
       for (i = 0, _ref = this.cards.length; 0 <= _ref ? i < _ref : i > _ref; 0 <= _ref ? i++ : i--) {
-        _results.push(console.log("" + this.cards[i]));
+        val += _cardEncode.encode(this.cards[i]);
+      }
+      return val;
+    };
+
+    Stack.prototype.dump = function() {
+      var i, _ref, _ref2, _results;
+      for (i = 0, _ref = this.cards.length; 0 <= _ref ? i < _ref : i > _ref; 0 <= _ref ? i++ : i--) {
+        console.log("" + i + ": " + this.cards[i]);
+        console.log(_cardEncode.encode(this.cards[i]));
+        this.cards[i].setFaceUp();
+      }
+      _results = [];
+      for (i = 0, _ref2 = this.cards.length; 0 <= _ref2 ? i < _ref2 : i > _ref2; 0 <= _ref2 ? i++ : i--) {
+        console.log("" + i + ": " + this.cards[i]);
+        _results.push(console.log(_cardEncode.encode(this.cards[i])));
       }
       return _results;
     };
@@ -216,26 +247,47 @@
       return this;
     };
 
-    Board.prototype.wasteToFoundation = function(index) {
+    Board.prototype._stackToStack = function(stack1, stack2) {
       var c;
-      if (index == null) index = 0;
-      if (this.waste.length()) {
-        c = this.waste.takeFromTop();
-        c.setFaceUp();
-        this.foundation[index].putOnTop(c);
+      if (stack1 && stack2 && stack1.length()) {
+        c = stack1.takeFromTop();
+        stack2.putOnTop(c);
+        return c;
+      } else {
+        return false;
+      }
+    };
+
+    Board.prototype.wasteToFoundation = function(fIndex) {
+      if (fIndex == null) fIndex = 0;
+      if (this._stackToStack(this.waste, this.foundation[fIndex])) {
         return true;
       } else {
         return false;
       }
     };
 
-    Board.prototype.wasteToTableau = function(index) {
-      var c;
-      if (index == null) index = 0;
-      if (this.waste.length()) {
-        c = this.waste.takeFromTop();
-        c.setFaceUp();
-        this.tableau[index].putOnTop(c);
+    Board.prototype.foundationToWaste = function(fIndex) {
+      if (fIndex == null) fIndex = 0;
+      if (this._stackToStack(this.foundation[fIndex], this.waste)) {
+        return true;
+      } else {
+        return false;
+      }
+    };
+
+    Board.prototype.wasteToTableau = function(tIndex) {
+      if (tIndex == null) tIndex = 0;
+      if (this._stackToStack(this.waste, this.tableau[tIndex])) {
+        return true;
+      } else {
+        return false;
+      }
+    };
+
+    Board.prototype.tableauToWaste = function(tIndex) {
+      if (tIndex == null) tIndex = 0;
+      if (this._stackToStack(this.tableau[tIndex], this.waste)) {
         return true;
       } else {
         return false;
@@ -245,17 +297,37 @@
     Board.prototype.tableauToFoundation = function(tIndex, fIndex) {
       if (tIndex == null) tIndex = 0;
       if (fIndex == null) fIndex = 0;
+      if (this._stackToStack(this.tableau[tIndex], this.foundation[fIndex])) {
+        return true;
+      } else {
+        return false;
+      }
     };
 
     Board.prototype.tableauToTableau = function(tIndex1, count, tIndex2) {
+      var i, s;
       if (tIndex1 == null) tIndex1 = 0;
       if (count == null) count = 1;
       if (tIndex2 == null) tIndex2 = 0;
+      if (this.tableau[tIndex1].length() < count) return false;
+      s = new Stack();
+      for (i = 0; 0 <= count ? i < count : i > count; 0 <= count ? i++ : i--) {
+        this._stackToStack(this.tableau[tIndex1], s);
+      }
+      for (i = 0; 0 <= count ? i < count : i > count; 0 <= count ? i++ : i--) {
+        if (!this._stackToStack(s, this.tableau[tIndex2])) return false;
+      }
+      return true;
     };
 
     Board.prototype.foundationToTableau = function(fIndex, tIndex) {
       if (fIndex == null) fIndex = 0;
       if (tIndex == null) tIndex = 0;
+      if (this._stackToStack(this.foundation[fIndex], this.tableau[tIndex])) {
+        return true;
+      } else {
+        return false;
+      }
     };
 
     return Board;

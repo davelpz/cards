@@ -95,7 +95,9 @@
 			var d1 = new Deck();
 			var d2 = new Deck(2);
 			var d3 = new Deck(3);
-
+console.log(d1.getState())
+d1.dump()
+console.log(d1.getState())
 			ok( d1, "constructor worked" );
 			equal( d1.length(), 52, "length should be 52" );
 			equal( d2.length(), 52*2, "length should be 104" );
@@ -165,14 +167,45 @@
 			equal(b1.wasteToFoundation(0),true,"w2f 0 should return true")
 			equal(b1.foundation[0].length(),1,"foundation 0 should have 1")
 
+			ok( b1.foundationToWaste, "foundationToWaste" );
+			equal(b1.foundationToWaste(0),true,"f2w 0 should return true")
+			equal(b1.waste.length(),3,"waste should have 3")
+
 			ok( b1.wasteToTableau, "wasteToTableau" );
 			equal(b1.wasteToTableau(0),true,"w2t 0 should return true")
 			equal(b1.wasteToTableau(1),true,"w2t 1 should return true")
-			equal(b1.wasteToTableau(2),false,"w2t 2 should return false")
+			equal(b1.wasteToTableau(2),true,"w2t 2 should return true")
+			equal(b1.wasteToTableau(3),false,"w2t 3 should return false")
 
 			equal(b1.tableau[0].length(),2,"tableau 0 should have 2")
 			equal(b1.tableau[1].length(),3,"tableau 1 should have 3")
-			equal(b1.tableau[2].length(),3,"tableau 2 should have 3")
+			equal(b1.tableau[2].length(),4,"tableau 2 should have 4")
+			equal(b1.tableau[3].length(),4,"tableau 3 should have 4")
+
+			ok( b1.tableauToWaste, "tableauToWaste" );
+			equal(b1.tableauToWaste(0),true,"t2w 0 should return true")
+			equal(b1.tableauToWaste(1),true,"t2w 1 should return true")
+			equal(b1.tableauToWaste(2),true,"t2w 2 should return true")
+			equal(b1.waste.length(),3,"waste should have 3")
+
+			ok( b1.tableauToFoundation, "tableauToFoundation" );
+			equal(b1.tableauToFoundation(0,0),true,"t2f 0 0 should return true")
+			equal(b1.tableauToFoundation(0,1),false,"t2f 0 1 should return false")
+			equal(b1.foundation[0].length(),1,"foundation 0 should have 1")
+
+			ok( b1.foundationToTableau, "foundationToTableau" );
+			equal(b1.foundationToTableau(0,0),true,"f2t 0 0 should return true")
+			equal(b1.foundationToTableau(0,1),false,"f2t 0 1 should return false")
+			equal(b1.tableau[0].length(),1,"tableau 0 should have 1")
+
+			ok( b1.tableauToTableau, "tableauToTableau" );
+			equal(b1.tableauToTableau(0,1,1),true,"t2t 0 1 0 should return true")
+			equal(b1.tableauToTableau(0,1,1),false,"t2t 0 1 0 should return false")
+			equal(b1.tableau[1].length(),3,"tableau 1 should have 3")
+
+			equal(b1.tableauToTableau(1,3,0),true,"t2t 1 3 0 should return true")
+			equal(b1.tableau[1].length(),0,"tableau 1 should have 0")
+			equal(b1.tableau[0].length(),3,"tableau 0 should have 3")
 
 		});
 	});
