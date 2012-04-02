@@ -26,6 +26,12 @@ class Card
 	isHigher: (arg) ->
 		_ranks.indexOf(arg.rank) > _ranks.indexOf(@rank)
 
+	isOneLower: (arg) ->
+		_ranks.indexOf(@rank) - _ranks.indexOf(arg.rank) is 1
+
+	isOneHigher: (arg) ->
+		_ranks.indexOf(arg.rank) - _ranks.indexOf(@rank) is 1
+
 	isFaceUp: ->
 		@faceUp is true
 
@@ -44,6 +50,15 @@ class _cardEncode
 			val += 52
 
 		String.fromCharCode(val)
+	@decode: (arg) ->
+		faceUp=false
+		arg -= 33
+		if (arg > 52)
+			faceUp = true
+			arg -= 52
+		suite = Math.floor(arg / 13)
+		rank = arg % 13
+		new Card(_ranks[rank],_suites[suite],faceUp)
 
 class Stack
 	constructor: (@cards=[])->
@@ -62,6 +77,9 @@ class Stack
 		@cards.length=0
 		this
 
+	equal: (arg) ->
+		arg.getState() is @getState()
+	
 	topCard: ->
 		l = @cards.length
 		if l > 0
@@ -95,10 +113,26 @@ class Stack
 			val += _cardEncode.encode(@cards[i])
 		val
 
+	initFromState: (state) ->
+		newcards = for c in state
+			_cardEncode.decode(c.charCodeAt(0))
+		@cards = newcards
+		this
+
 	dump: ->
 		for i in [0...@cards.length]
 			console.log(""+i+": "+@cards[i])
 			@cards[i].setFaceUp()
+		for i in [0...@cards.length]
+			@cards[i].setFaceUp(false)
+		state = @getState()
+		for c in state
+			console.log(c.charCodeAt(0))
+		for i in [0...@cards.length]
+			@cards[i].setFaceUp()
+		state = @getState()
+		for c in state
+			console.log(c.charCodeAt(0))
 
 
 class Deck extends Stack
@@ -209,8 +243,54 @@ class Board
 			true
 		else
 			false
-		
+
+class Klondike extends Board
+	constructor: ->
+		super
+		@score = 0
+		@undo = []
+
+	wasteToTableau:(tIndex=0) ->
+		tab = @tableau[tIndex]
+		tTopCard = tab.topCard()
+		wTopCard = @waste.topCard()
+
+		if tab.length() > 0 and tTopCard and wTopCard and tTopCard.isOneLower(wTopCard) and not tTopCard.sameColor(wTopCard)
+			@score += 5
+			super(tIndex)
+		else
+			false
+
+	wasteToFoundation:(fIndex=0) ->
+		tab = @foundation[fIndex]
+		fTopCard = tab.topCard()
+		wTopCard = @waste.topCard()
+
+		if tab.length() > 0 
+			if fTopCard and wTopCard and fTopCard.isOneHigher(wTopCard) and fTopCard.suite is wTopCard.suite
+				@score += 10
+				return super(fIndex)
+		else
+			if (wTopCard.rank is "Ace")
+				@score += 10
+				return super(fIndex)
+
+		false
+
+	foundationToTableau: (fIndex=0,tIndex=0) ->
+		fStack = @foundation[fIndex]
+		tStack = @tableau[tIndex]
+		tTopCard = tStack.topCard()
+		fTopCard = fStack.topCard()
+
+		if tTopCard and fTopCard and tTopCard.isOneLower(fTopCard) and not tTopCard.sameColor(fTopCard)
+			@score -= 15
+			super(fIndex,tIndex)
+		else
+			false
+
 window.Card = Card
 window.Stack = Stack
 window.Deck = Deck
 window.Board = Board
+window.Klondike = Klondike

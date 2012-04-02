@@ -1,5 +1,5 @@
 (function() {
-  var Board, Card, Deck, Stack, _cardEncode, _ranks, _suites,
+  var Board, Card, Deck, Klondike, Stack, _cardEncode, _ranks, _suites,
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
@@ -43,6 +43,14 @@
       return _ranks.indexOf(arg.rank) > _ranks.indexOf(this.rank);
     };
 
+    Card.prototype.isOneLower = function(arg) {
+      return _ranks.indexOf(this.rank) - _ranks.indexOf(arg.rank) === 1;
+    };
+
+    Card.prototype.isOneHigher = function(arg) {
+      return _ranks.indexOf(arg.rank) - _ranks.indexOf(this.rank) === 1;
+    };
+
     Card.prototype.isFaceUp = function() {
       return this.faceUp === true;
     };
@@ -71,6 +79,19 @@
       val += _ranks.indexOf(card.rank);
       if (card.isFaceUp()) val += 52;
       return String.fromCharCode(val);
+    };
+
+    _cardEncode.decode = function(arg) {
+      var faceUp, rank, suite;
+      faceUp = false;
+      arg -= 33;
+      if (arg > 52) {
+        faceUp = true;
+        arg -= 52;
+      }
+      suite = Math.floor(arg / 13);
+      rank = arg % 13;
+      return new Card(_ranks[rank], _suites[suite], faceUp);
     };
 
     return _cardEncode;
@@ -105,6 +126,10 @@
     Stack.prototype.clear = function() {
       this.cards.length = 0;
       return this;
+    };
+
+    Stack.prototype.equal = function(arg) {
+      return arg.getState() === this.getState();
     };
 
     Stack.prototype.topCard = function() {
@@ -152,17 +177,43 @@
       return val;
     };
 
+    Stack.prototype.initFromState = function(state) {
+      var c, newcards;
+      newcards = (function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = state.length; _i < _len; _i++) {
+          c = state[_i];
+          _results.push(_cardEncode.decode(c.charCodeAt(0)));
+        }
+        return _results;
+      })();
+      this.cards = newcards;
+      return this;
+    };
+
     Stack.prototype.dump = function() {
-      var i, _ref, _ref2, _results;
+      var c, i, state, _i, _j, _len, _len2, _ref, _ref2, _ref3, _results;
       for (i = 0, _ref = this.cards.length; 0 <= _ref ? i < _ref : i > _ref; 0 <= _ref ? i++ : i--) {
         console.log("" + i + ": " + this.cards[i]);
-        console.log(_cardEncode.encode(this.cards[i]));
         this.cards[i].setFaceUp();
       }
-      _results = [];
       for (i = 0, _ref2 = this.cards.length; 0 <= _ref2 ? i < _ref2 : i > _ref2; 0 <= _ref2 ? i++ : i--) {
-        console.log("" + i + ": " + this.cards[i]);
-        _results.push(console.log(_cardEncode.encode(this.cards[i])));
+        this.cards[i].setFaceUp(false);
+      }
+      state = this.getState();
+      for (_i = 0, _len = state.length; _i < _len; _i++) {
+        c = state[_i];
+        console.log(c.charCodeAt(0));
+      }
+      for (i = 0, _ref3 = this.cards.length; 0 <= _ref3 ? i < _ref3 : i > _ref3; 0 <= _ref3 ? i++ : i--) {
+        this.cards[i].setFaceUp();
+      }
+      state = this.getState();
+      _results = [];
+      for (_j = 0, _len2 = state.length; _j < _len2; _j++) {
+        c = state[_j];
+        _results.push(console.log(c.charCodeAt(0)));
       }
       return _results;
     };
@@ -334,6 +385,70 @@
 
   })();
 
+  Klondike = (function(_super) {
+
+    __extends(Klondike, _super);
+
+    function Klondike() {
+      Klondike.__super__.constructor.apply(this, arguments);
+      this.score = 0;
+      this.undo = [];
+    }
+
+    Klondike.prototype.wasteToTableau = function(tIndex) {
+      var tTopCard, tab, wTopCard;
+      if (tIndex == null) tIndex = 0;
+      tab = this.tableau[tIndex];
+      tTopCard = tab.topCard();
+      wTopCard = this.waste.topCard();
+      if (tab.length() > 0 && tTopCard && wTopCard && tTopCard.isOneLower(wTopCard) && !tTopCard.sameColor(wTopCard)) {
+        this.score += 5;
+        return Klondike.__super__.wasteToTableau.call(this, tIndex);
+      } else {
+        return false;
+      }
+    };
+
+    Klondike.prototype.wasteToFoundation = function(fIndex) {
+      var fTopCard, tab, wTopCard;
+      if (fIndex == null) fIndex = 0;
+      tab = this.foundation[fIndex];
+      fTopCard = tab.topCard();
+      wTopCard = this.waste.topCard();
+      if (tab.length() > 0) {
+        if (fTopCard && wTopCard && fTopCard.isOneHigher(wTopCard) && fTopCard.suite === wTopCard.suite) {
+          this.score += 10;
+          return Klondike.__super__.wasteToFoundation.call(this, fIndex);
+        }
+      } else {
+        if (wTopCard.rank === "Ace") {
+          this.score += 10;
+          return Klondike.__super__.wasteToFoundation.call(this, fIndex);
+        }
+      }
+      return false;
+    };
+
+    Klondike.prototype.foundationToTableau = function(fIndex, tIndex) {
+      var fStack, fTopCard, tStack, tTopCard;
+      if (fIndex == null) fIndex = 0;
+      if (tIndex == null) tIndex = 0;
+      fStack = this.foundation[fIndex];
+      tStack = this.tableau[tIndex];
+      tTopCard = tStack.topCard();
+      fTopCard = fStack.topCard();
+      if (tTopCard && fTopCard && tTopCard.isOneLower(fTopCard) && !tTopCard.sameColor(fTopCard)) {
+        this.score -= 15;
+        return Klondike.__super__.foundationToTableau.call(this, fIndex, tIndex);
+      } else {
+        return false;
+      }
+    };
+
+    return Klondike;
+
+  })(Board);
+
   window.Card = Card;
 
   window.Stack = Stack;
@@ -341,5 +456,7 @@
   window.Deck = Deck;
 
   window.Board = Board;
+
+  window.Klondike = Klondike;
 
 }).call(this);

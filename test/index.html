@@ -44,8 +44,12 @@
 			equal(c3.sameColor(c5),false,"not same color")
 			ok(c1.isLower,"isLower");
 			ok(c4.isLower(c5),"rank is lower");
+			ok(c1.isOneLower,"isOneLower");
+			ok(c4.isOneLower(c5),"rank is one lower");
 			ok(c1.isHigher,"isHigher");
 			ok(c1.isHigher(c5),"rank is higher");
+			ok(c1.isOneHigher,"isOneHigher");
+			ok(c5.isOneHigher(c4),"rank is one higher");
 			ok(c1.equal,"equal");
 			equal( c1.equal(c2), true, "equal should be true" );
 			ok(c1.toString,"toString");
@@ -89,15 +93,26 @@
 			c = s1.takeFromBottom()
 			equal( c===undefined, true, "card should undefined" );
 			equal( s1.length(), 0, "length should be zero" );
+
+			ok( s1.getState, "getState" );
+			s1.putOnBottom(new Card("Jack","Diamonds"))
+			s1.putOnBottom(new Card("6","Clubs"))
+			state = s1.getState()
+			equal( state.length, 2, "length should be 2" );
+			equal( state, "@R", "should equal @R" );
+			s3 = new Stack()
+			ok( s1.initFromState, "initFromState" );
+			s3.initFromState(state)
+			equal(s3.cards[0].equal((new Card("6","Clubs"))),true,"first card should be 6 of Clubs")
+			equal(s3.cards[1].equal((new Card("Jack","Diamonds"))),true,"second card should be Jack of Diamonds")
+			equal(s1.equal(s3),true,"stacks are equal")
+			
 		});
 		module("Deck");
 		test("basic functionality", function() {
 			var d1 = new Deck();
 			var d2 = new Deck(2);
 			var d3 = new Deck(3);
-console.log(d1.getState())
-d1.dump()
-console.log(d1.getState())
 			ok( d1, "constructor worked" );
 			equal( d1.length(), 52, "length should be 52" );
 			equal( d2.length(), 52*2, "length should be 104" );
@@ -206,6 +221,41 @@ console.log(d1.getState())
 			equal(b1.tableauToTableau(1,3,0),true,"t2t 1 3 0 should return true")
 			equal(b1.tableau[1].length(),0,"tableau 1 should have 0")
 			equal(b1.tableau[0].length(),3,"tableau 0 should have 3")
+
+		});
+		module("Klondike");
+		test("basic functionality", function() {
+			var k = new Klondike();
+
+			k.waste.putOnTop(new Card("3","Clubs"))
+			k.waste.putOnTop(new Card("4","Clubs"))
+			k.waste.putOnTop(new Card("4","Diamonds"))
+			k.waste.putOnTop(new Card("2","Clubs"))
+			k.waste.putOnTop(new Card("Ace","Clubs"))
+			k.waste.putOnTop(new Card("Ace","Hearts"))
+
+			equal(k.wasteToFoundation(0),true,"w2f 0 should return true")
+			equal(k.wasteToFoundation(1),true,"w2f 1 should return true")
+			equal(k.wasteToFoundation(1),true,"w2f 1 should return true")
+			equal(k.wasteToFoundation(1),false,"w2f 1 should return false")
+			k.waste.takeFromTop()
+			equal(k.wasteToFoundation(1),false,"w2f should return false")
+
+			equal(k.score,30,"score should be 30")
+
+			k.tableau[0].putOnTop(new Card("5","Hearts"))
+			k.tableau[1].putOnTop(new Card("5","Diamonds"))
+			equal(k.wasteToTableau(0),true,"w2t 0 should return true")
+			equal(k.wasteToTableau(0),false,"w2t 0 should return false")
+			equal(k.wasteToTableau(1),false,"w2t 1 should return false")
+			equal(k.score,35,"score should be 35")
+
+			k.foundation[1].putOnTop(new Card("7","Clubs"))
+			k.foundation[0].putOnTop(new Card("3","Diamonds"))
+			equal(k.foundationToTableau(0,0),true,"f2t 0 0 should return true")
+			equal(k.foundationToTableau(1,1),false,"f2t 1 1 should return false")
+
+			equal(k.score,20,"score should be 20")
 
 		});
 	});
