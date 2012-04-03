@@ -20,16 +20,16 @@ class Card
 		else if @suite is _suites[1] or @suite is _suites[3]
 			return arg.suite is _suites[1] or arg.suite is _suites[3]
 
-	isLower: (arg) ->
+	isHigher: (arg) ->
 		_ranks.indexOf(arg.rank) < _ranks.indexOf(@rank)
 
-	isHigher: (arg) ->
+	isLower: (arg) ->
 		_ranks.indexOf(arg.rank) > _ranks.indexOf(@rank)
 
-	isOneLower: (arg) ->
+	isOneHigher: (arg) ->
 		_ranks.indexOf(@rank) - _ranks.indexOf(arg.rank) is 1
 
-	isOneHigher: (arg) ->
+	isOneLower: (arg) ->
 		_ranks.indexOf(arg.rank) - _ranks.indexOf(@rank) is 1
 
 	isFaceUp: ->
@@ -80,6 +80,9 @@ class Stack
 	equal: (arg) ->
 		arg.getState() is @getState()
 	
+	getCardFromTop: (index=1)->
+		@cards[@cards.length-index]
+
 	topCard: ->
 		l = @cards.length
 		if l > 0
@@ -255,7 +258,7 @@ class Klondike extends Board
 		tTopCard = tab.topCard()
 		wTopCard = @waste.topCard()
 
-		if tab.length() > 0 and tTopCard and wTopCard and tTopCard.isOneLower(wTopCard) and not tTopCard.sameColor(wTopCard)
+		if tab.length() > 0 and tTopCard and wTopCard and wTopCard.isOneLower(tTopCard) and not wTopCard.sameColor(tTopCard)
 			@score += 5
 			super(tIndex)
 		else
@@ -267,7 +270,7 @@ class Klondike extends Board
 		wTopCard = @waste.topCard()
 
 		if tab.length() > 0 
-			if fTopCard and wTopCard and fTopCard.isOneHigher(wTopCard) and fTopCard.suite is wTopCard.suite
+			if fTopCard and wTopCard and wTopCard.isOneHigher(fTopCard) and wTopCard.suite is fTopCard.suite
 				@score += 10
 				return super(fIndex)
 		else
@@ -283,11 +286,39 @@ class Klondike extends Board
 		tTopCard = tStack.topCard()
 		fTopCard = fStack.topCard()
 
-		if tTopCard and fTopCard and tTopCard.isOneLower(fTopCard) and not tTopCard.sameColor(fTopCard)
+		if tTopCard and fTopCard and fTopCard.isOneLower(tTopCard) and not tTopCard.sameColor(fTopCard)
 			@score -= 15
 			super(fIndex,tIndex)
 		else
 			false
+
+	tableauToTableau: (tIndex1=0,count=1,tIndex2=0) ->
+		tStack1 = @tableau[tIndex1]
+		tStack2 = @tableau[tIndex2]
+		tCard1 = tStack1.getCardFromTop(count)
+		tTopCard2 = tStack2.topCard()
+
+		if tCard1 and tTopCard2 and tCard1.isOneLower(tTopCard2) and not tTopCard2.sameColor(tCard1)
+			super(tIndex1,count,tIndex2)
+		else
+			false
+
+	tableauToFoundation:(tIndex=0,fIndex=0) ->
+		tStack = @tableau[tIndex]
+		fStack = @foundation[fIndex]
+		fTopCard = fStack.topCard()
+		tTopCard = tStack.topCard()
+
+		if fStack.length() > 0 
+			if fTopCard and tTopCard and tTopCard.isOneHigher(fTopCard) and fTopCard.suite is tTopCard.suite
+				@score += 10
+				return super(tIndex,fIndex)
+		else
+			if (tTopCard.rank is "Ace")
+				@score += 10
+				return super(tIndex,fIndex)
+
+		false
 
 window.Card = Card
 window.Stack = Stack

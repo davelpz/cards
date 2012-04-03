@@ -35,19 +35,19 @@
       }
     };
 
-    Card.prototype.isLower = function(arg) {
+    Card.prototype.isHigher = function(arg) {
       return _ranks.indexOf(arg.rank) < _ranks.indexOf(this.rank);
     };
 
-    Card.prototype.isHigher = function(arg) {
+    Card.prototype.isLower = function(arg) {
       return _ranks.indexOf(arg.rank) > _ranks.indexOf(this.rank);
     };
 
-    Card.prototype.isOneLower = function(arg) {
+    Card.prototype.isOneHigher = function(arg) {
       return _ranks.indexOf(this.rank) - _ranks.indexOf(arg.rank) === 1;
     };
 
-    Card.prototype.isOneHigher = function(arg) {
+    Card.prototype.isOneLower = function(arg) {
       return _ranks.indexOf(arg.rank) - _ranks.indexOf(this.rank) === 1;
     };
 
@@ -130,6 +130,11 @@
 
     Stack.prototype.equal = function(arg) {
       return arg.getState() === this.getState();
+    };
+
+    Stack.prototype.getCardFromTop = function(index) {
+      if (index == null) index = 1;
+      return this.cards[this.cards.length - index];
     };
 
     Stack.prototype.topCard = function() {
@@ -401,7 +406,7 @@
       tab = this.tableau[tIndex];
       tTopCard = tab.topCard();
       wTopCard = this.waste.topCard();
-      if (tab.length() > 0 && tTopCard && wTopCard && tTopCard.isOneLower(wTopCard) && !tTopCard.sameColor(wTopCard)) {
+      if (tab.length() > 0 && tTopCard && wTopCard && wTopCard.isOneLower(tTopCard) && !wTopCard.sameColor(tTopCard)) {
         this.score += 5;
         return Klondike.__super__.wasteToTableau.call(this, tIndex);
       } else {
@@ -416,7 +421,7 @@
       fTopCard = tab.topCard();
       wTopCard = this.waste.topCard();
       if (tab.length() > 0) {
-        if (fTopCard && wTopCard && fTopCard.isOneHigher(wTopCard) && fTopCard.suite === wTopCard.suite) {
+        if (fTopCard && wTopCard && wTopCard.isOneHigher(fTopCard) && wTopCard.suite === fTopCard.suite) {
           this.score += 10;
           return Klondike.__super__.wasteToFoundation.call(this, fIndex);
         }
@@ -437,12 +442,50 @@
       tStack = this.tableau[tIndex];
       tTopCard = tStack.topCard();
       fTopCard = fStack.topCard();
-      if (tTopCard && fTopCard && tTopCard.isOneLower(fTopCard) && !tTopCard.sameColor(fTopCard)) {
+      if (tTopCard && fTopCard && fTopCard.isOneLower(tTopCard) && !tTopCard.sameColor(fTopCard)) {
         this.score -= 15;
         return Klondike.__super__.foundationToTableau.call(this, fIndex, tIndex);
       } else {
         return false;
       }
+    };
+
+    Klondike.prototype.tableauToTableau = function(tIndex1, count, tIndex2) {
+      var tCard1, tStack1, tStack2, tTopCard2;
+      if (tIndex1 == null) tIndex1 = 0;
+      if (count == null) count = 1;
+      if (tIndex2 == null) tIndex2 = 0;
+      tStack1 = this.tableau[tIndex1];
+      tStack2 = this.tableau[tIndex2];
+      tCard1 = tStack1.getCardFromTop(count);
+      tTopCard2 = tStack2.topCard();
+      if (tCard1 && tTopCard2 && tCard1.isOneLower(tTopCard2) && !tTopCard2.sameColor(tCard1)) {
+        return Klondike.__super__.tableauToTableau.call(this, tIndex1, count, tIndex2);
+      } else {
+        return false;
+      }
+    };
+
+    Klondike.prototype.tableauToFoundation = function(tIndex, fIndex) {
+      var fStack, fTopCard, tStack, tTopCard;
+      if (tIndex == null) tIndex = 0;
+      if (fIndex == null) fIndex = 0;
+      tStack = this.tableau[tIndex];
+      fStack = this.foundation[fIndex];
+      fTopCard = fStack.topCard();
+      tTopCard = tStack.topCard();
+      if (fStack.length() > 0) {
+        if (fTopCard && tTopCard && tTopCard.isOneHigher(fTopCard) && fTopCard.suite === tTopCard.suite) {
+          this.score += 10;
+          return Klondike.__super__.tableauToFoundation.call(this, tIndex, fIndex);
+        }
+      } else {
+        if (tTopCard.rank === "Ace") {
+          this.score += 10;
+          return Klondike.__super__.tableauToFoundation.call(this, tIndex, fIndex);
+        }
+      }
+      return false;
     };
 
     return Klondike;

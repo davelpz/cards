@@ -3,27 +3,18 @@
 <head>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script src="src/cards.js" type="text/javascript"></script>
+<script src="src/canvasRenderer.js" type="text/javascript"></script>
 </head>
 <body>
+	<canvas id="myCanvas" width="578" height="200"></canvas>
 </body>
 <script>
-	var d = new Deck(3)
-	console.log(d)
-	d.dump()
-	console.log("Shuffle")
-	d.shuffle();
-	d.dump()
-	var s = new Stack()
-	console.log(s)
-	s.putOnTop(new Card("Ace","Diamonds"))
-	s.putOnTop(new Card("2","Diamonds"))
-	console.log(s.takeFromTop())
-	console.log(s.takeFromTop())
-	console.log(s.takeFromTop())
-	s.putOnBottom(new Card("Ace","Diamonds"))
-	s.putOnBottom(new Card("2","Diamonds"))
-	console.log(s.takeFromBottom())
-	console.log(s.takeFromBottom())
-	console.log(s.takeFromBottom())
+	$(function() {
+		var cr = new CanvasRenderer("myCanvas")
+		cr.moveTo(10,10)
+		cr.roundedRect(50,50,5)
+		cr.ctx.stroke()
+		cr.ctx.fill()
+	});
 </script>
 </html>
